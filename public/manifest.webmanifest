@@ -1,0 +1,12 @@
+{
+  "name": "Islamic Khata",
+  "short_name": "Islamic Khata",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f5ea",
+  "theme_color": "#064e3b",
+  "description": "Imam Sahab ka Hisaab, Har Ghar ki Zimmedari",
+  "icons": [
+    {"src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
