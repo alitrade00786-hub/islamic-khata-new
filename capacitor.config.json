@@ -1,0 +1,6 @@
+{
+  "appId": "com.islamickhata.app",
+  "appName": "Islamic Khata",
+  "webDir": "dist",
+  "server": {"androidScheme": "https"}
+}
