@@ -1,10 +1,108 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="110" fill="#064e3b"/>
-<path d="M95 294c42 35 89 48 161 48s119-13 161-48" fill="none" stroke="#d6ad3c" stroke-width="25" stroke-linecap="round"/>
-<path d="M137 290V210c0-67 54-121 121-121s121 54 121 121v80" fill="#f6f5ea"/>
-<path d="M258 62a78 78 0 1 1-47 136 68 68 0 1 0 47-136z" fill="#d6ad3c"/>
-<path d="M182 293v-57l76-65 76 65v57" fill="#0b6b51"/>
-<path d="M230 293v-54h56v54" fill="#f6f5ea"/>
-<path d="M350 293V170h28v123" fill="#0b6b51"/>
-<path d="M343 170h42l-21-32z" fill="#0b6b51"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06452f"/>
+      <stop offset="1" stop-color="#002c20"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe27a"/>
+      <stop offset="0.5" stop-color="#f6bd32"/>
+      <stop offset="1" stop-color="#d99a18"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="5" stdDeviation="6"
+                    flood-opacity=".35"/>
+    </filter>
+  </defs>
+
+  <!-- Green rounded app icon -->
+  <rect x="8" y="8" width="496" height="496" rx="105"
+        fill="url(#bg)"/>
+
+  <!-- Mosque arch -->
+  <path d="M155 210
+           L155 150
+           Q256 48 357 150
+           L357 210"
+        fill="none"
+        stroke="url(#gold)"
+        stroke-width="25"
+        stroke-linecap="round"/>
+
+  <!-- Crescent -->
+  <path d="M265 108
+           A55 55 0 1 0 292 174
+           A43 43 0 1 1 265 108Z"
+        fill="url(#gold)"/>
+
+  <!-- Star -->
+  <path d="M315 112
+           l7 16 17 1-13 11 4 17-15-9-15 9
+           4-17-13-11 17-1z"
+        fill="url(#gold)"/>
+
+  <!-- Open book -->
+  <g filter="url(#shadow)">
+    <path d="M72 258
+             Q145 225 256 275
+             L256 382
+             Q160 330 72 354Z"
+          fill="#fffdf5"/>
+
+    <path d="M440 258
+             Q367 225 256 275
+             L256 382
+             Q352 330 440 354Z"
+          fill="#fffdf5"/>
+
+    <path d="M72 354
+             Q165 330 256 382
+             Q347 330 440 354
+             L420 375
+             Q340 354 256 405
+             Q172 354 92 375Z"
+          fill="#eee9dc"/>
+  </g>
+
+  <!-- Gold underline -->
+  <path d="M95 385
+           Q175 370 256 414
+           Q337 370 417 385"
+        fill="none"
+        stroke="url(#gold)"
+        stroke-width="18"
+        stroke-linecap="round"/>
+
+  <!-- Quill -->
+  <path d="M335 350
+           Q370 245 430 190
+           Q421 258 355 365Z"
+        fill="url(#gold)"/>
+
+  <path d="M348 339
+           Q385 280 416 226"
+        fill="none"
+        stroke="#075036"
+        stroke-width="8"
+        stroke-linecap="round"/>
+
+  <!-- Islamic -->
+  <text x="256" y="455"
+        text-anchor="middle"
+        font-family="Georgia,serif"
+        font-size="54"
+        font-weight="bold"
+        fill="#fffdf5">
+    Islamic
+  </text>
+
+  <!-- Khata -->
+  <text x="256" y="490"
+        text-anchor="middle"
+        font-family="Georgia,serif"
+        font-size="34"
+        font-weight="bold"
+        fill="url(#gold)">
+    Khata
+  </text>
 </svg>
