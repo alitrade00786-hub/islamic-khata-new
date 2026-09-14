@@ -1,108 +1,119 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#06452f"/>
-      <stop offset="1" stop-color="#002c20"/>
+      <stop offset="0%" stop-color="#063f2b"/>
+      <stop offset="55%" stop-color="#08734d"/>
+      <stop offset="100%" stop-color="#022d20"/>
     </linearGradient>
+
     <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffe27a"/>
-      <stop offset="0.5" stop-color="#f6bd32"/>
-      <stop offset="1" stop-color="#d99a18"/>
+      <stop offset="0%" stop-color="#fff0a6"/>
+      <stop offset="35%" stop-color="#e8c45a"/>
+      <stop offset="70%" stop-color="#b88624"/>
+      <stop offset="100%" stop-color="#ffe58a"/>
     </linearGradient>
+
     <filter id="shadow">
-      <feDropShadow dx="0" dy="5" stdDeviation="6"
-                    flood-opacity=".35"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="8"
+                    flood-color="#000000" flood-opacity="0.35"/>
     </filter>
   </defs>
 
-  <!-- Green rounded app icon -->
-  <rect x="8" y="8" width="496" height="496" rx="105"
-        fill="url(#bg)"/>
+  <!-- Premium app background -->
+  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
 
-  <!-- Mosque arch -->
-  <path d="M155 210
-           L155 150
-           Q256 48 357 150
-           L357 210"
-        fill="none"
-        stroke="url(#gold)"
-        stroke-width="25"
-        stroke-linecap="round"/>
-
-  <!-- Crescent -->
-  <path d="M265 108
-           A55 55 0 1 0 292 174
-           A43 43 0 1 1 265 108Z"
-        fill="url(#gold)"/>
-
-  <!-- Star -->
-  <path d="M315 112
-           l7 16 17 1-13 11 4 17-15-9-15 9
-           4-17-13-11 17-1z"
-        fill="url(#gold)"/>
-
-  <!-- Open book -->
-  <g filter="url(#shadow)">
-    <path d="M72 258
-             Q145 225 256 275
-             L256 382
-             Q160 330 72 354Z"
-          fill="#fffdf5"/>
-
-    <path d="M440 258
-             Q367 225 256 275
-             L256 382
-             Q352 330 440 354Z"
-          fill="#fffdf5"/>
-
-    <path d="M72 354
-             Q165 330 256 382
-             Q347 330 440 354
-             L420 375
-             Q340 354 256 405
-             Q172 354 92 375Z"
-          fill="#eee9dc"/>
+  <!-- Subtle Islamic pattern -->
+  <g opacity="0.08" fill="none" stroke="#ffffff" stroke-width="3">
+    <path d="M256 35 L477 163 L477 349 L256 477 L35 349 L35 163 Z"/>
+    <path d="M256 70 L438 175 L438 337 L256 442 L74 337 L74 175 Z"/>
+    <path d="M256 105 L399 188 L399 324 L256 407 L113 324 L113 188 Z"/>
   </g>
 
-  <!-- Gold underline -->
-  <path d="M95 385
-           Q175 370 256 414
-           Q337 370 417 385"
-        fill="none"
-        stroke="url(#gold)"
-        stroke-width="18"
-        stroke-linecap="round"/>
+  <!-- Golden crescent -->
+  <path d="M205 78
+           C165 95 145 136 151 177
+           C158 224 198 253 240 250
+           C207 233 188 201 188 166
+           C188 129 207 99 237 84
+           C227 78 216 76 205 78Z"
+        fill="url(#gold)"
+        filter="url(#shadow)"/>
 
-  <!-- Quill -->
-  <path d="M335 350
-           Q370 245 430 190
-           Q421 258 355 365Z"
+  <!-- Star -->
+  <path d="M275 91
+           L283 111
+           L305 112
+           L288 125
+           L294 147
+           L275 134
+           L256 147
+           L262 125
+           L245 112
+           L267 111 Z"
         fill="url(#gold)"/>
 
-  <path d="M348 339
-           Q385 280 416 226"
-        fill="none"
-        stroke="#075036"
+  <!-- Mosque dome -->
+  <path d="M148 300
+           Q256 205 364 300
+           L364 315
+           L148 315 Z"
+        fill="url(#gold)"
+        filter="url(#shadow)"/>
+
+  <!-- Dome finial -->
+  <path d="M256 210 L256 190
+           M246 190 Q256 178 266 190
+           M256 178 L256 166"
+        stroke="url(#gold)"
         stroke-width="8"
-        stroke-linecap="round"/>
+        stroke-linecap="round"
+        fill="none"/>
 
-  <!-- Islamic -->
-  <text x="256" y="455"
-        text-anchor="middle"
-        font-family="Georgia,serif"
-        font-size="54"
-        font-weight="bold"
-        fill="#fffdf5">
-    Islamic
-  </text>
+  <!-- Mosque building -->
+  <rect x="160" y="310" width="192" height="92"
+        rx="5" fill="#f7e8b0"/>
 
-  <!-- Khata -->
-  <text x="256" y="490"
+  <!-- Door -->
+  <path d="M238 402 V355
+           Q256 331 274 355 V402 Z"
+        fill="#064532"/>
+
+  <!-- Windows -->
+  <path d="M180 344 Q180 329 195 329 Q210 329 210 344 V365 H180 Z"
+        fill="#08734d"/>
+  <path d="M302 344 Q302 329 317 329 Q332 329 332 344 V365 H302 Z"
+        fill="#08734d"/>
+
+  <!-- Minarets -->
+  <rect x="125" y="265" width="30" height="137" rx="4"
+        fill="#f7e8b0"/>
+  <rect x="357" y="265" width="30" height="137" rx="4"
+        fill="#f7e8b0"/>
+
+  <path d="M119 266 L140 239 L161 266 Z" fill="url(#gold)"/>
+  <path d="M351 266 L372 239 L393 266 Z" fill="url(#gold)"/>
+
+  <!-- Minaret balconies -->
+  <rect x="119" y="286" width="42" height="9" rx="3"
+        fill="url(#gold)"/>
+  <rect x="351" y="286" width="42" height="9" rx="3"
+        fill="url(#gold)"/>
+
+  <!-- App name panel -->
+  <rect x="72" y="421" width="368" height="62"
+        rx="31"
+        fill="#021f16"
+        stroke="url(#gold)"
+        stroke-width="3"/>
+
+  <!-- Islamic Khata text -->
+  <text x="256" y="463"
         text-anchor="middle"
-        font-family="Georgia,serif"
-        font-size="34"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="35"
         font-weight="bold"
+        letter-spacing="1.5"
         fill="url(#gold)">
-    Khata
+    Islamic Khata
   </text>
 </svg>
