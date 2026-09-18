@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  Home, Users, History, Settings, Search, Plus, Phone,
-  MessageCircle, ChevronRight, LogOut, LockKeyhole, Eye,
-  EyeOff, UserRound, Smartphone, MapPin, Building2,
-  WalletCards, CheckCircle2, XCircle, ArrowLeft, Pencil,
-  IndianRupee, X
+  Home, Users, History, Settings, Plus, Phone, MessageCircle,
+  LogOut, LockKeyhole, Eye, EyeOff, UserRound, Smartphone,
+  MapPin, Building2, WalletCards, ArrowLeft, Pencil,
+  IndianRupee, X, Search
 } from "lucide-react";
 import "./styles.css";
 import { seedDemo, repo } from "./store.js";
@@ -19,22 +18,12 @@ function money(n) {
 function formatDate(v) {
   if (!v) return "—";
   return new Date(v + "T12:00:00").toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
+    day: "2-digit", month: "short", year: "numeric"
   });
 }
 
 function monthsCovered(amount, fee) {
   return fee > 0 ? Math.floor(Number(amount) / Number(fee)) : 0;
-}
-
-function addMonths(date, months) {
-  const d = new Date(date + "T12:00:00");
-  const day = d.getDate();
-  d.setMonth(d.getMonth() + months);
-  if (d.getDate() < day) d.setDate(0);
-  return d.toISOString().slice(0, 10);
 }
 
 function App() {
@@ -43,9 +32,11 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [, refresh] = useState(0);
 
-  useEffect(() => seedDemo(), []);
+  useEffect(() => {
+    seedDemo();
+  }, []);
 
-  const reload = () => refresh(x => x + 1);
+  const reload = () => refresh(v => v + 1);
 
   if (!session) {
     return (
@@ -61,55 +52,97 @@ function App() {
   }
 
   const user = repo.getUser(session.userId);
+
+  if (!user) {
+    repo.logout();
+    setSession(null);
+    return null;
+  }
+
   const members = repo.getMembers(session.userId).map(repo.effectiveStatus);
+
+  const openMember = (m) => {
+    setSelected(m);
+    setScreen("member");
+  };
 
   let page;
 
-  if (screen === "dashboard")
-    page = <Dashboard user={user} members={members}
-      openMember={(m) => { setSelected(m); setScreen("member"); }}
-      onAdd={() => setScreen("add")}
-      reload={reload}
-    />;
+  if (screen === "dashboard") {
+    page = (
+      <Dashboard
+        user={user}
+        members={members}
+        openMember={openMember}
+        onAdd={() => setScreen("add")}
+        reload={reload}
+      />
+    );
+  }
 
-  if (screen === "members")
-    page = <Members members={members}
-      openMember={(m) => { setSelected(m); setScreen("member"); }}
-      onAdd={() => setScreen("add")}
-    />;
+  if (screen === "members") {
+    page = (
+      <Members
+        members={members}
+        openMember={openMember}
+        onAdd={() => setScreen("add")}
+      />
+    );
+  }
 
-  if (screen === "history")
+  if (screen === "history") {
     page = <HistoryPage members={members} />;
+  }
 
-  if (screen === "settings")
-    page = <SettingsPage user={user}
-      onSave={(u) => { repo.saveUser(u); reload(); }}
-    />;
+  if (screen === "settings") {
+    page = (
+      <SettingsPage
+        user={user}
+        onSave={(u) => {
+          repo.saveUser(u);
+          reload();
+          setScreen("dashboard");
+        }}
+      />
+    );
+  }
 
-  if (screen === "add")
-    page = <MemberForm user={user}
-      onBack={() => setScreen("members")}
-      onSave={() => { reload(); setScreen("members"); }}
-    />;
+  if (screen === "add") {
+    page = (
+      <MemberForm
+        user={user}
+        onBack={() => setScreen("members")}
+        onSave={() => {
+          reload();
+          setScreen("members");
+        }}
+      />
+    );
+  }
 
-  if (screen === "member")
-    page = <MemberDetails
-      member={selected}
-      user={user}
-      onBack={() => setScreen("members")}
-      onChanged={() => {
-        reload();
-        setSelected(repo.getMember(selected.id));
-      }}
-    />;
+  if (screen === "member") {
+    page = (
+      <MemberDetails
+        member={selected}
+        onBack={() => setScreen("members")}
+        onChanged={() => {
+          reload();
+          if (selected) setSelected(repo.getMember(selected.id));
+        }}
+      />
+    );
+  }
 
   return (
-    <Shell screen={screen} setScreen={setScreen} user={user}
+    <Shell
+      screen={screen}
+      setScreen={setScreen}
       onLogout={() => {
         repo.logout();
         setSession(null);
         setScreen("login");
-      }}>
+      }}
+    >
       {page}
     </Shell>
   );
@@ -132,23 +165,24 @@ function Auth({ screen, setScreen, onLogin }) {
       if (screen === "signup") {
         const u = repo.signup(form);
         onLogin({ userId: u.id });
-      } else {
+        return;
+      }
+
+      if (screen === "login") {
         const u = repo.login(form.mobile, form.password);
         onLogin({ userId: u.id });
+        return;
       }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
 
-  const google = () => {
-    alert("Google Sign-Up ke liye Firebase Google Authentication setup karna hoga.");
+      alert("Password reset ke liye Firebase Authentication setup karna hoga.");
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    }
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
-
         <div className="logo-box">
           <img src="/icons/icon.svg" alt="Islamic Khata" />
           <h1>Islamic Khata</h1>
@@ -156,40 +190,50 @@ function Auth({ screen, setScreen, onLogin }) {
         </div>
 
         <h2 className="auth-title">
-          {screen === "login" ? "Welcome Back!" :
-           screen === "signup" ? "Create Account" : "Reset Password"}
+          {screen === "login"
+            ? "Welcome Back!"
+            : screen === "signup"
+              ? "Create Account"
+              : "Reset Password"}
         </h2>
 
         {error && <div className="error">{error}</div>}
 
         <form onSubmit={submit}>
-
           {screen === "signup" && (
-            <Field label="Full Name" icon={<UserRound />}
+            <Field
+              label="Full Name"
+              icon={<UserRound />}
               value={form.name}
               placeholder="Enter your name"
-              onChange={v => setForm({ ...form, name: v })}
+              onChange={(v) => setForm({ ...form, name: v })}
             />
           )}
 
-          <Field label="Mobile Number" icon={<Smartphone />}
+          <Field
+            label="Mobile Number"
+            icon={<Smartphone />}
             value={form.mobile}
             placeholder="Enter 10 digit mobile number"
-            onChange={v => setForm({ ...form, mobile: v })}
+            onChange={(v) => setForm({ ...form, mobile: v })}
           />
 
           {screen === "signup" && (
             <>
-              <Field label="Village / Area Name" icon={<MapPin />}
+              <Field
+                label="Village / Area Name"
+                icon={<MapPin />}
                 value={form.village}
                 placeholder="Enter village / area"
-                onChange={v => setForm({ ...form, village: v })}
+                onChange={(v) => setForm({ ...form, village: v })}
               />
 
-              <Field label="Masjid Name" icon={<Building2 />}
+              <Field
+                label="Masjid Name"
+                icon={<Building2 />}
                 value={form.masjid}
                 placeholder="Enter masjid name"
-                onChange={v => setForm({ ...form, masjid: v })}
+                onChange={(v) => setForm({ ...form, masjid: v })}
               />
             </>
           )}
@@ -201,10 +245,13 @@ function Auth({ screen, setScreen, onLogin }) {
               type={show ? "text" : "password"}
               value={form.password}
               placeholder="Enter password"
-              onChange={v => setForm({ ...form, password: v })}
+              onChange={(v) => setForm({ ...form, password: v })}
               right={
-                <button type="button" className="eye"
-                  onClick={() => setShow(!show)}>
+                <button
+                  type="button"
+                  className="eye"
+                  onClick={() => setShow(!show)}
+                >
                   {show ? <EyeOff /> : <Eye />}
                 </button>
               }
@@ -212,17 +259,24 @@ function Auth({ screen, setScreen, onLogin }) {
           )}
 
           <button className="btn btn-primary" type="submit">
-            {screen === "login" ? "Login" :
-             screen === "signup" ? "Sign Up" : "Send Reset Link"}
+            {screen === "login"
+              ? "Login"
+              : screen === "signup"
+                ? "Sign Up"
+                : "Send Reset Link"}
           </button>
         </form>
 
         {(screen === "login" || screen === "signup") && (
           <>
             <div className="or"><span /> OR <span /></div>
-
-            <button className="btn google-btn"
-              type="button" onClick={google}>
+            <button
+              className="btn google-btn"
+              type="button"
+              onClick={() =>
+                alert("Google Sign-Up ke liye Firebase Google Authentication setup karna hoga.")
+              }
+            >
               <span className="google-icon">G</span>
               Continue with Google
             </button>
@@ -250,9 +304,7 @@ function Auth({ screen, setScreen, onLogin }) {
         {screen === "signup" && (
           <div className="auth-links">
             Already have an account?{" "}
-            <button onClick={() => setScreen("login")}>
-              Login
-            </button>
+            <button onClick={() => setScreen("login")}>Login</button>
           </div>
         )}
 
@@ -269,36 +321,38 @@ function Auth({ screen, setScreen, onLogin }) {
           <strong>Owner: Md Aliser</strong>
           <small>Contact: +91 7970534020</small>
         </div>
-
       </div>
     </div>
   );
 }
 
-function Field({ icon, label, value, onChange, placeholder, type = "text", right }) {
+function Field({
+  icon, label, value, onChange, placeholder, type = "text", right
+}) {
   return (
     <div className="form-group">
       <label>{label}</label>
       <div style={{ position: "relative" }}>
         <span style={{
-          position: "absolute", left: 12, top: 12,
-          color: "#075c3b"
-        }}>{icon}</span>
+          position: "absolute", left: 12, top: 12, color: "#075c3b"
+        }}>
+          {icon}
+        </span>
 
         <input
           className="input"
           style={{ paddingLeft: 45, paddingRight: right ? 45 : 14 }}
           type={type}
-          value={value}
+          value={value ?? ""}
           placeholder={placeholder}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           required={label !== "Masjid Name"}
         />
 
         {right && (
-          <span style={{
-            position: "absolute", right: 8, top: 7
-          }}>{right}</span>
+          <span style={{ position: "absolute", right: 8, top: 7 }}>
+            {right}
+          </span>
         )}
       </div>
     </div>
@@ -307,7 +361,7 @@ function Field({ icon, label, value, onChange, placeholder, type = "text", right
 
 /* ---------------- SHELL ---------------- */
 
-function Shell({ screen, setScreen, user, onLogout, children }) {
+function Shell({ screen, setScreen, onLogout, children }) {
   const nav = [
     ["dashboard", "Dashboard", Home],
     ["members", "Members", Users],
@@ -317,7 +371,6 @@ function Shell({ screen, setScreen, user, onLogout, children }) {
 
   return (
     <div className="app page-space">
-
       <header className="topbar">
         <div className="brand">
           <img src="/icons/icon.svg" alt="Islamic Khata" />
@@ -329,9 +382,7 @@ function Shell({ screen, setScreen, user, onLogout, children }) {
         </button>
       </header>
 
-      <main className="container">
-        {children}
-      </main>
+      <main className="container">{children}</main>
 
       <nav className="bottom-nav">
         {nav.map(([id, title, Icon]) => (
@@ -346,7 +397,6 @@ function Shell({ screen, setScreen, user, onLogout, children }) {
           </button>
         ))}
       </nav>
-
     </div>
   );
 }
@@ -354,76 +404,71 @@ function Shell({ screen, setScreen, user, onLogout, children }) {
 /* ---------------- DASHBOARD ---------------- */
 
 function Dashboard({ user, members, openMember, onAdd }) {
-  const paid = members.filter(m => m.status === "paid").length;
+  const paid = members.filter((m) => m.status === "paid").length;
   const unpaid = members.length - paid;
+
+  const chooseCover = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image.");
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      alert("Photo 4MB se chhoti honi chahiye.");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      repo.saveUser({
+        ...user,
+        masjidPhoto: reader.result
+      });
+
+      window.location.reload();
+    };
+
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div>
-
-      <div
+      {/* Tap/click ANYWHERE on this cover to choose a photo. */}
+      <label
         className={"hero " + (user.masjidPhoto ? "has-cover" : "")}
-        style={user.masjidPhoto ? {
-          backgroundImage:
-            `linear-gradient(rgba(0,45,30,.72),rgba(0,35,24,.82)),url(${user.masjidPhoto})`
-        } : {}}
+        style={{
+          ...(user.masjidPhoto
+            ? {
+                backgroundImage:
+                  `linear-gradient(rgba(0,45,30,.72),rgba(0,35,24,.82)),url(${user.masjidPhoto})`
+              }
+            : {}),
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          cursor: "pointer",
+          display: "block"
+        }}
       >
-        <label
-  className={"hero " + (user.masjidPhoto ? "has-cover" : "")}
-  style={{
-    ...(user.masjidPhoto
-      ? {
-          backgroundImage:
-            `linear-gradient(rgba(0,45,30,.72),rgba(0,35,24,.82)),url(${user.masjidPhoto})`
-        }
-      : {}),
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    cursor: "pointer",
-    display: "block"
-  }}
->
-  <div className="hero-content">
-    <span className="hero-badge">Assalamu Alaikum</span>
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={chooseCover}
+        />
 
-    <h1>{user.masjidName || "Your Masjid"}</h1>
-
-    <p>{user.village || "Village / Area"}</p>
-
-    <p>Monthly Collection Manager</p>
-
-    <span className="cover-btn">
-      📷 Add Cover
-    </span>
-
-    <input
-      type="file"
-      accept="image/*"
-      hidden
-      onChange={e => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (file.size > 4 * 1024 * 1024) {
-          alert("Photo 4MB se chhoti honi chahiye.");
-          return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          repo.saveUser({
-            ...user,
-            masjidPhoto: reader.result
-          });
-
-          location.reload();
-        };
-
-        reader.readAsDataURL(file);
-      }}
-    />
-  </div>
-</label>
+        <div className="hero-content">
+          <span className="hero-badge">Assalamu Alaikum</span>
+          <h1>{user.masjidName || "Your Masjid"}</h1>
+          <p>{user.village || "Village / Area"}</p>
+          <p>Monthly Collection Manager</p>
+          <span className="cover-btn">📷 Add Cover</span>
+        </div>
+      </label>
 
       <div className="stats-grid">
         <Stat title="Total Members" n={members.length} />
@@ -442,13 +487,11 @@ function Dashboard({ user, members, openMember, onAdd }) {
         <MemberSearch members={members} openMember={openMember} />
 
         <div className="member-list">
-          {members.map(m =>
-            <MemberRow key={m.id} m={m}
-              open={() => openMember(m)} />
-          )}
+          {members.map((m) => (
+            <MemberRow key={m.id} m={m} open={() => openMember(m)} />
+          ))}
         </div>
       </div>
-
     </div>
   );
 }
@@ -466,25 +509,35 @@ function MemberSearch({ members, openMember }) {
   const [q, setQ] = useState("");
 
   const results = q
-    ? members.filter(m =>
-        (m.name + " " + m.mobile)
-          .toLowerCase()
-          .includes(q.toLowerCase())
+    ? members.filter((m) =>
+        (m.name + " " + m.mobile).toLowerCase().includes(q.toLowerCase())
       )
     : [];
 
   return (
     <div style={{ position: "relative" }}>
-      <input
-        className="input search"
-        placeholder="Search by name or mobile number..."
-        value={q}
-        onChange={e => setQ(e.target.value)}
-      />
+      <div style={{ position: "relative" }}>
+        <Search
+          size={18}
+          style={{
+            position: "absolute",
+            left: 12,
+            top: 13,
+            zIndex: 1
+          }}
+        />
+        <input
+          className="input search"
+          style={{ paddingLeft: 40 }}
+          placeholder="Search by name or mobile number..."
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </div>
 
       {q && results.length > 0 && (
         <div className="section">
-          {results.map(m =>
+          {results.map((m) => (
             <button
               key={m.id}
               className="btn btn-outline"
@@ -493,8 +546,12 @@ function MemberSearch({ members, openMember }) {
             >
               {m.name} — {m.mobile}
             </button>
-          )}
+          ))}
         </div>
+      )}
+
+      {q && results.length === 0 && (
+        <div className="empty">No member found.</div>
       )}
     </div>
   );
@@ -508,17 +565,20 @@ function MemberRow({ m, open }) {
       onClick={open}
     >
       <div className="member-left">
-        {m.photo
-          ? <img className="member-avatar" src={m.photo} />
-          : <div className="member-avatar"
-              style={{
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 800
-              }}>
-              {m.name.slice(0, 1).toUpperCase()}
-            </div>
-        }
+        {m.photo ? (
+          <img className="member-avatar" src={m.photo} alt={m.name} />
+        ) : (
+          <div
+            className="member-avatar"
+            style={{
+              display: "grid",
+              placeItems: "center",
+              fontWeight: 800
+            }}
+          >
+            {m.name.slice(0, 1).toUpperCase()}
+          </div>
+        )}
 
         <div>
           <div className="member-name">{m.name}</div>
@@ -550,10 +610,9 @@ function Members({ members, openMember, onAdd }) {
       <MemberSearch members={members} openMember={openMember} />
 
       <div className="member-list">
-        {members.map(m =>
-          <MemberRow key={m.id} m={m}
-            open={() => openMember(m)} />
-        )}
+        {members.map((m) => (
+          <MemberRow key={m.id} m={m} open={() => openMember(m)} />
+        ))}
       </div>
     </div>
   );
@@ -563,12 +622,15 @@ function Members({ members, openMember, onAdd }) {
 
 function MemberForm({ user, onBack, onSave }) {
   const [f, setF] = useState({
-    name: "", mobile: "", monthlyFee: user.defaultFee || 500,
+    name: "",
+    mobile: "",
+    monthlyFee: user.defaultFee || 500,
     photo: ""
   });
 
-  const save = e => {
+  const save = (e) => {
     e.preventDefault();
+
     repo.addMember(user.id, f);
 
     if (f.photo) {
@@ -583,7 +645,6 @@ function MemberForm({ user, onBack, onSave }) {
 
   return (
     <div className="section">
-
       <button className="btn btn-outline" onClick={onBack}>
         <ArrowLeft size={17} /> Back
       </button>
@@ -591,34 +652,38 @@ function MemberForm({ user, onBack, onSave }) {
       <h2>Add New Home Holder</h2>
 
       <form onSubmit={save}>
-
-        <Field label="Home Holder Name" icon={<UserRound />}
+        <Field
+          label="Home Holder Name"
+          icon={<UserRound />}
           value={f.name}
           placeholder="Enter full name"
-          onChange={v => setF({ ...f, name: v })}
+          onChange={(v) => setF({ ...f, name: v })}
         />
 
-        <Field label="Mobile Number" icon={<Smartphone />}
+        <Field
+          label="Mobile Number"
+          icon={<Smartphone />}
           value={f.mobile}
           placeholder="10 digit mobile number"
-          onChange={v => setF({ ...f, mobile: v })}
+          onChange={(v) => setF({ ...f, mobile: v })}
         />
 
-        <Field label="Monthly Fee" icon={<IndianRupee />}
+        <Field
+          label="Monthly Fee"
+          icon={<IndianRupee />}
           value={f.monthlyFee}
           placeholder="500"
-          onChange={v => setF({ ...f, monthlyFee: v })}
+          onChange={(v) => setF({ ...f, monthlyFee: v })}
         />
 
         <PhotoUpload
           value={f.photo}
-          onChange={v => setF({ ...f, photo: v })}
+          onChange={(v) => setF({ ...f, photo: v })}
         />
 
         <button className="btn btn-primary" type="submit">
           Save Member
         </button>
-
       </form>
     </div>
   );
@@ -628,12 +693,19 @@ function PhotoUpload({ value, onChange }) {
   return (
     <div className="photo-upload">
       <b>Member Photo</b>
+
       <input
         type="file"
         accept="image/*"
-        onChange={e => {
+        onChange={(e) => {
           const file = e.target.files?.[0];
           if (!file) return;
+
+          if (file.size > 4 * 1024 * 1024) {
+            alert("Photo 4MB se chhoti honi chahiye.");
+            return;
+          }
+
           const r = new FileReader();
           r.onload = () => onChange(r.result);
           r.readAsDataURL(file);
@@ -652,7 +724,7 @@ function PhotoUpload({ value, onChange }) {
 function MemberDetails({ member, onBack, onChanged }) {
   const [pay, setPay] = useState(false);
   const [edit, setEdit] = useState(false);
-  const [amount, setAmount] = useState(member.monthlyFee);
+  const [amount, setAmount] = useState(member?.monthlyFee || 500);
 
   if (!member) return null;
 
@@ -661,66 +733,79 @@ function MemberDetails({ member, onBack, onChanged }) {
 
   const receive = () => {
     const a = Number(amount);
-    if (!a) return;
 
-    repo.receivePayment(member.id, a, today());
-    setPay(false);
-    onChanged();
+    if (!a) {
+      alert("Enter payment amount.");
+      return;
+    }
+
+    try {
+      repo.receivePayment(member.id, a, today());
+      setPay(false);
+      onChanged();
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   return (
     <div>
-
       <button className="btn btn-outline" onClick={onBack}>
         <ArrowLeft size={17} /> Members
       </button>
 
       <div className="member-header">
-
-        {member.photo
-          ? <img className="member-large-avatar"
-              src={member.photo} alt={member.name} />
-          : <div className="member-large-avatar"
-              style={{
-                display: "grid",
-                placeItems: "center",
-                margin: "auto",
-                fontSize: 40,
-                fontWeight: 800
-              }}>
-              {member.name.slice(0, 1).toUpperCase()}
-            </div>
-        }
+        {member.photo ? (
+          <img
+            className="member-large-avatar"
+            src={member.photo}
+            alt={member.name}
+          />
+        ) : (
+          <div
+            className="member-large-avatar"
+            style={{
+              display: "grid",
+              placeItems: "center",
+              margin: "auto",
+              fontSize: 40,
+              fontWeight: 800
+            }}
+          >
+            {member.name.slice(0, 1).toUpperCase()}
+          </div>
+        )}
 
         <h2>{member.name}</h2>
         <p>{member.mobile}</p>
 
-        <span className={
-          "status " + (current.status === "paid" ? "paid" : "unpaid")
-        }>
+        <span className={"status " + (current.status === "paid" ? "paid" : "unpaid")}>
           {current.status === "paid" ? "PAID" : "NOT PAID"}
         </span>
 
         <PhotoUpload
           value={member.photo || ""}
-          onChange={photo => {
+          onChange={(photo) => {
             const db = JSON.parse(localStorage.getItem("islamic_khata_db_v1"));
-            const m = db.members.find(x => x.id === member.id);
+            const m = db.members.find((x) => x.id === member.id);
+
             if (m) m.photo = photo;
-            localStorage.setItem("islamic_khata_db_v1", JSON.stringify(db));
+
+            localStorage.setItem(
+              "islamic_khata_db_v1",
+              JSON.stringify(db)
+            );
+
             onChanged();
           }}
         />
 
-        <button className="edit-member-btn"
-          onClick={() => setEdit(true)}>
+        <button className="edit-member-btn" onClick={() => setEdit(true)}>
           <Pencil size={16} /> Edit Member
         </button>
-
       </div>
 
       <div className="section">
-
         <div className="detail-grid">
           <div className="detail-box">
             <small>Monthly Fee</small>
@@ -744,23 +829,31 @@ function MemberDetails({ member, onBack, onChanged }) {
         </div>
 
         <div className="member-actions" style={{ marginTop: 15 }}>
-          <a className="small-btn"
-            href={"tel:" + member.mobile}>📞 Call</a>
+          <a className="small-btn" href={"tel:" + member.mobile}>
+            <Phone size={16} /> Call
+          </a>
 
-          <a className="small-btn"
+          <a
+            className="small-btn"
             href={"https://wa.me/91" + member.mobile}
-            target="_blank">💬 WhatsApp</a>
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MessageCircle size={16} /> WhatsApp
+          </a>
 
-          <a className="small-btn"
-            href={"sms:" + member.mobile}>✉️ Message</a>
+          <a className="small-btn" href={"sms:" + member.mobile}>
+            ✉️ Message
+          </a>
         </div>
 
-        <button className="btn btn-primary"
+        <button
+          className="btn btn-primary"
           style={{ marginTop: 15, width: "100%" }}
-          onClick={() => setPay(true)}>
+          onClick={() => setPay(true)}
+        >
           <WalletCards size={18} /> Receive Payment
         </button>
-
       </div>
 
       <div className="section">
@@ -770,7 +863,7 @@ function MemberDetails({ member, onBack, onChanged }) {
           <div className="empty">No payments yet.</div>
         )}
 
-        {payments.map(p =>
+        {payments.map((p) => (
           <div className="history-row" key={p.id}>
             <div>
               <b>{money(p.amount)}</b>
@@ -782,21 +875,23 @@ function MemberDetails({ member, onBack, onChanged }) {
               <small>{formatDate(p.date)}</small>
             </div>
           </div>
-        )}
+        ))}
       </div>
 
       {pay && (
         <div className="modal-overlay">
           <div className="modal">
-
-            <button className="btn btn-outline"
-              onClick={() => setPay(false)}>
+            <button
+              className="btn btn-outline"
+              onClick={() => setPay(false)}
+            >
               <X />
             </button>
 
             <h2>Receive Payment</h2>
 
-            <Field label="Payment Amount"
+            <Field
+              label="Payment Amount"
               icon={<IndianRupee />}
               value={amount}
               placeholder="500"
@@ -808,11 +903,9 @@ function MemberDetails({ member, onBack, onChanged }) {
               {" "}complete month(s) will be added.
             </p>
 
-            <button className="btn btn-primary"
-              onClick={receive}>
+            <button className="btn btn-primary" onClick={receive}>
               Save Payment
             </button>
-
           </div>
         </div>
       )}
@@ -827,7 +920,6 @@ function MemberDetails({ member, onBack, onChanged }) {
           }}
         />
       )}
-
     </div>
   );
 }
@@ -843,7 +935,7 @@ function EditMember({ member, close, saved }) {
 
   const save = () => {
     const db = JSON.parse(localStorage.getItem("islamic_khata_db_v1"));
-    const m = db.members.find(x => x.id === member.id);
+    const m = db.members.find((x) => x.id === member.id);
 
     if (m) {
       m.name = f.name;
@@ -858,37 +950,36 @@ function EditMember({ member, close, saved }) {
   return (
     <div className="modal-overlay">
       <div className="modal">
-
-        <button className="btn btn-outline"
-          onClick={close}>
+        <button className="btn btn-outline" onClick={close}>
           <X />
         </button>
 
         <h2>Edit Member</h2>
 
-        <Field label="Member Name"
+        <Field
+          label="Member Name"
           icon={<UserRound />}
           value={f.name}
-          onChange={v => setF({ ...f, name: v })}
+          onChange={(v) => setF({ ...f, name: v })}
         />
 
-        <Field label="Mobile Number"
+        <Field
+          label="Mobile Number"
           icon={<Smartphone />}
           value={f.mobile}
-          onChange={v => setF({ ...f, mobile: v })}
+          onChange={(v) => setF({ ...f, mobile: v })}
         />
 
-        <Field label="Monthly Fee"
+        <Field
+          label="Monthly Fee"
           icon={<IndianRupee />}
           value={f.monthlyFee}
-          onChange={v => setF({ ...f, monthlyFee: v })}
+          onChange={(v) => setF({ ...f, monthlyFee: v })}
         />
 
-        <button className="btn btn-primary"
-          onClick={save}>
+        <button className="btn btn-primary" onClick={save}>
           Save Changes
         </button>
-
       </div>
     </div>
   );
@@ -897,9 +988,10 @@ function EditMember({ member, close, saved }) {
 /* ---------------- HISTORY ---------------- */
 
 function HistoryPage({ members }) {
-  const all = members.flatMap(m =>
-    repo.getPayments(m.id).map(p => ({
-      ...p, name: m.name
+  const all = members.flatMap((m) =>
+    repo.getPayments(m.id).map((p) => ({
+      ...p,
+      name: m.name
     }))
   );
 
@@ -907,20 +999,23 @@ function HistoryPage({ members }) {
     <div className="section">
       <h2>Payment History</h2>
 
-      {all.length === 0 &&
+      {all.length === 0 && (
         <div className="empty">No payment records.</div>
-      }
+      )}
 
-      {all.map(p =>
+      {all.map((p) => (
         <div className="history-row" key={p.id}>
           <div>
             <b>{p.name}</b>
             <br />
-            <small>{money(p.amount)} • {p.monthsCovered} month(s)</small>
+            <small>
+              {money(p.amount)} • {p.monthsCovered} month(s)
+            </small>
           </div>
+
           <small>{formatDate(p.date)}</small>
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -930,33 +1025,41 @@ function HistoryPage({ members }) {
 function SettingsPage({ user, onSave }) {
   const [f, setF] = useState({ ...user });
 
+  const save = () => {
+    repo.saveUser(f);
+    onSave(f);
+  };
+
   return (
     <div className="section">
-
       <h2>Settings</h2>
 
-      <Field label="Owner Name"
+      <Field
+        label="Owner Name"
         icon={<UserRound />}
         value={f.name || ""}
-        onChange={v => setF({ ...f, name: v })}
+        onChange={(v) => setF({ ...f, name: v })}
       />
 
-      <Field label="Mobile Number"
+      <Field
+        label="Mobile Number"
         icon={<Smartphone />}
         value={f.mobile || ""}
-        onChange={v => setF({ ...f, mobile: v })}
+        onChange={(v) => setF({ ...f, mobile: v })}
       />
 
-      <Field label="Village / Area"
+      <Field
+        label="Village / Area"
         icon={<MapPin />}
         value={f.village || ""}
-        onChange={v => setF({ ...f, village: v })}
+        onChange={(v) => setF({ ...f, village: v })}
       />
 
-      <Field label="Masjid Name"
+      <Field
+        label="Masjid Name"
         icon={<Building2 />}
         value={f.masjidName || ""}
-        onChange={v => setF({ ...f, masjidName: v })}
+        onChange={(v) => setF({ ...f, masjidName: v })}
       />
 
       <div className="photo-upload">
@@ -966,32 +1069,36 @@ function SettingsPage({ user, onSave }) {
         <input
           type="file"
           accept="image/*"
-          onChange={e => {
+          onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
 
+            if (file.size > 4 * 1024 * 1024) {
+              alert("Photo 4MB se chhoti honi chahiye.");
+              return;
+            }
+
             const r = new FileReader();
-            r.onload = () =>
-              setF({ ...f, masjidPhoto: r.result });
+            r.onload = () => setF({ ...f, masjidPhoto: r.result });
             r.readAsDataURL(file);
           }}
         />
 
-        {f.masjidPhoto &&
-          <img className="photo-preview"
-            src={f.masjidPhoto} />
-        }
+        {f.masjidPhoto && (
+          <img
+            className="photo-preview"
+            src={f.masjidPhoto}
+            alt="Masjid cover"
+          />
+        )}
       </div>
 
-      <button className="btn btn-primary"
-        onClick={() => onSave(f)}>
+      <button className="btn btn-primary" onClick={save}>
         Save Settings
       </button>
-
     </div>
   );
 }
 
 seedDemo();
-
 createRoot(document.getElementById("root")).render(<App />);
