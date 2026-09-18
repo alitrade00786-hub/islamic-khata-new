@@ -367,41 +367,63 @@ function Dashboard({ user, members, openMember, onAdd }) {
             `linear-gradient(rgba(0,45,30,.72),rgba(0,35,24,.82)),url(${user.masjidPhoto})`
         } : {}}
       >
-        <div className="hero-content">
-          <span className="hero-badge">Assalamu Alaikum</span>
-          <h1>{user.masjidName || "Your Masjid"}</h1>
-          <p>{user.village || "Village / Area"}</p>
-          <p>Monthly Collection Manager</p>
+        <label
+  className={"hero " + (user.masjidPhoto ? "has-cover" : "")}
+  style={{
+    ...(user.masjidPhoto
+      ? {
+          backgroundImage:
+            `linear-gradient(rgba(0,45,30,.72),rgba(0,35,24,.82)),url(${user.masjidPhoto})`
+        }
+      : {}),
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    cursor: "pointer",
+    display: "block"
+  }}
+>
+  <div className="hero-content">
+    <span className="hero-badge">Assalamu Alaikum</span>
 
-          <label className="cover-btn">
-            📷 Add Cover
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (!file) return;
+    <h1>{user.masjidName || "Your Masjid"}</h1>
 
-                if (file.size > 4 * 1024 * 1024) {
-                  alert("Photo 4MB se chhoti honi chahiye.");
-                  return;
-                }
+    <p>{user.village || "Village / Area"}</p>
 
-                const reader = new FileReader();
-                reader.onload = () => {
-                  repo.saveUser({
-                    ...user,
-                    masjidPhoto: reader.result
-                  });
-                  location.reload();
-                };
-                reader.readAsDataURL(file);
-              }}
-            />
-          </label>
-        </div>
-      </div>
+    <p>Monthly Collection Manager</p>
+
+    <span className="cover-btn">
+      📷 Add Cover
+    </span>
+
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 4 * 1024 * 1024) {
+          alert("Photo 4MB se chhoti honi chahiye.");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          repo.saveUser({
+            ...user,
+            masjidPhoto: reader.result
+          });
+
+          location.reload();
+        };
+
+        reader.readAsDataURL(file);
+      }}
+    />
+  </div>
+</label>
 
       <div className="stats-grid">
         <Stat title="Total Members" n={members.length} />
